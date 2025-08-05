@@ -21,7 +21,7 @@ Rent a Car Database System is a scalable, secure solution for efficiently storin
 
 1. Clone the repository:  
 ```bash
-git clone https://github.com/your-username/rentacar_database_system.git
+git clone (https://github.com/furkanarslan00/RentACar_DatabaseSystem)
 ````
 2. Run database initialization scripts if available.
 
