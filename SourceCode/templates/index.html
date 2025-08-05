@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Interface</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div id="container">
+        <h1>SQL Interface</h1>
+        <h2>Basic Query</h2>
+        <textarea id="query" rows="4" cols="50" placeholder="Enter your SQL query here"></textarea>
+        <button onclick="executeQuery()">Execute Query</button>
+        <div id="query-result"></div>
+        
+        <h2>Insert Data</h2>
+        <input type="text" id="insert-table" placeholder="Table name">
+        <textarea id="insert-values" rows="4" cols="50" placeholder='{"column1": "value1", "column2": "value2"}'></textarea>
+        <button onclick="insertData()">Insert</button>
+        <div id="insert-result"></div>
+        
+        <h2>Update Data</h2>
+        <input type="text" id="update-table" placeholder="Table name">
+        <textarea id="update-values" rows="4" cols="50" placeholder='{"column1": "new_value1", "column2": "new_value2"}'></textarea>
+        <textarea id="update-condition" rows="2" cols="50" placeholder='{"column1": "value1"}'></textarea>
+        <button onclick="updateData()">Update</button>
+        <div id="update-result"></div>
+        
+        <h2>Delete Data</h2>
+        <input type="text" id="delete-table" placeholder="Table name">
+        <textarea id="delete-condition" rows="2" cols="50" placeholder='{"column1": "value1"}'></textarea>
+        <button onclick="deleteData()">Delete</button>
+        <div id="delete-result"></div>
+        
+        <h2>Custom Query</h2>
+        <textarea id="custom-query" rows="4" cols="50" placeholder="Enter your custom SQL query here"></textarea>
+        <textarea id="custom-params" rows="2" cols="50" placeholder='["param1", "param2"]'></textarea>
+        <button onclick="customQuery()">Execute Custom Query</button>
+        <div id="custom-query-result"></div>
+
+        <h2>Example Custom Query</h2>
+        <button onclick="allQuery()">Execute Example Query</button>
+        <div id="all-query-result"></div>
+    </div>
+
+    <script>
+        function executeQuery() {
+            var query = document.getElementById('query').value;
+            
+            fetch('/api/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query: query })
+            })
+            .then(response => response.json())
+            .then(data => {
+                var resultDiv = document.getElementById('query-result');
+                resultDiv.innerHTML = '';
+                if (data.length > 0) {
+                    var table = document.createElement('table');
+                    var thead = table.createTHead();
+                    var tbody = table.createTBody();
+                    var headerRow = thead.insertRow();
+                    for (var key in data[0]) {
+                        var th = document.createElement('th');
+                        th.textContent = key;
+                        headerRow.appendChild(th);
+                    }
+                    data.forEach(rowData => {
+                        var row = tbody.insertRow();
+                        for (var key in rowData) {
+                            var cell = row.insertCell();
+                            cell.textContent = rowData[key];
+                        }
+                    });
+                    resultDiv.appendChild(table);
+                } else {
+                    resultDiv.textContent = 'No results found';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    
+        function insertData() {
+            var table = document.getElementById('insert-table').value;
+            var values = JSON.parse(document.getElementById('insert-values').value);
+            
+            fetch('/api/insert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ table: table, values: values })
+            })
+            .then(response => response.json())
+            .then(data => {
+                var resultDiv = document.getElementById('insert-result');
+                resultDiv.innerHTML = '';
+                resultDiv.textContent = data.status;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    
+        function updateData() {
+            var table = document.getElementById('update-table').value;
+            var values = JSON.parse(document.getElementById('update-values').value);
+            var condition = JSON.parse(document.getElementById('update-condition').value);
+            
+            fetch('/api/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ table: table, values: values, condition: condition })
+            })
+            .then(response => response.json())
+            .then(data => {
+                var resultDiv = document.getElementById('update-result');
+                resultDiv.innerHTML = '';
+                resultDiv.textContent = data.status;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    
+        function deleteData() {
+            var table = document.getElementById('delete-table').value;
+            var condition = JSON.parse(document.getElementById('delete-condition').value);
+            
+            fetch('/api/delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ table: table, condition: condition })
+            })
+            .then(response => response.json())
+            .then(data => {
+                var resultDiv = document.getElementById('delete-result');
+                resultDiv.innerHTML = '';
+                resultDiv.textContent = data.status;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    
+        function customQuery() {
+            var query = document.getElementById('custom-query').value;
+            var params = JSON.parse(document.getElementById('custom-params').value);
+            
+            fetch('/api/custom', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query: query, params: params })
+            })
+            .then(response => response.json())
+            .then(data => {
+                var resultDiv = document.getElementById('custom-query-result');
+                resultDiv.innerHTML = '';
+                if (data && data.length > 0) {
+                    var table = document.createElement('table');
+                    var thead = table.createTHead();
+                    var tbody = table.createTBody();
+                    var headerRow = thead.insertRow();
+                    for (var key in data[0]) {
+                        var th = document.createElement('th');
+                        th.textContent = key;
+                        headerRow.appendChild(th);
+                    }
+                    data.forEach(rowData => {
+                        var row = tbody.insertRow();
+                        for (var key in rowData) {
+                            var cell = document.createElement('td');
+                            cell.textContent = rowData[key];
+                            row.appendChild(cell);
+                        }
+                        tbody.appendChild(row);
+                    });
+                    table.appendChild(thead);
+                    table.appendChild(tbody);
+                    resultDiv.appendChild(table);
+                } else if (data) {
+                    resultDiv.textContent = 'No results found';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    
+        function allQuery() {
+            var query = "";
+            var query_type = "";
+    
+            fetch('/api/allquery', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query: query, query_type: query_type })
+            })
+            .then(response => response.json())
+            .then(data => {
+                var resultDiv = document.getElementById('all-query-result');
+                resultDiv.innerHTML = '';
+                if (data.length > 0) {
+                    var table = document.createElement('table');
+                    var thead = document.createElement('thead');
+                    var tbody = document.createElement('tbody');
+                    var headerRow = document.createElement('tr');
+                    for (var key in data[0]) {
+                        var th = document.createElement('th');
+                        th.textContent = key;
+                        headerRow.appendChild(th);
+                    }
+                    thead.appendChild(headerRow);
+                    data.forEach(rowData => {
+                        var row = document.createElement('tr');
+                        for (var key in rowData) {
+                            var cell = document.createElement('td');
+                            cell.textContent = rowData[key];
+                            row.appendChild(cell);
+                        }
+                        tbody.appendChild(row);
+                    });
+                    table.appendChild(thead);
+                    table.appendChild(tbody);
+                    resultDiv.appendChild(table);
+                } else {
+                    resultDiv.textContent = 'No results found';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+    
+    
+</body>
+</html>
