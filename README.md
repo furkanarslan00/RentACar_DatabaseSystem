@@ -1,4 +1,3 @@
-
 # Rent a Car Database System
 
 ## About
